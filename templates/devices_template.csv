@@ -1,0 +1,69 @@
+name,ip_address,device_type,username,password,enable_password,port,description
+# Cisco Examples
+switch01,192.168.1.1,cisco_ios,admin,admin_pass,enable_pass,22,Core IOS Switch
+nxos01,192.168.1.2,cisco_nxos,admin,admin_pass,enable_pass,22,Nexus Switch
+asa01,192.168.1.3,cisco_asa,admin,admin_pass,enable_pass,22,ASA Firewall
+wlc01,192.168.1.4,cisco_wlc,admin,admin_pass,enable_pass,22,Wireless Controller
+xr01,192.168.1.5,cisco_xr,admin,admin_pass,enable_pass,22,IOS-XR Router
+
+# Juniper Examples
+juniper01,192.168.2.1,juniper,admin,admin_pass,enable_pass,22,Juniper Router
+junos01,192.168.2.2,juniper_junos,admin,admin_pass,enable_pass,22,JunOS Device
+
+# Other Vendor Examples
+arista01,192.168.3.1,arista_eos,admin,admin_pass,enable_pass,22,Arista Switch
+hp01,192.168.3.2,hp_procurve,admin,admin_pass,enable_pass,22,HP Switch
+huawei01,192.168.3.3,huawei,admin,admin_pass,enable_pass,22,Huawei Router
+f5_01,192.168.3.4,f5_ltm,admin,admin_pass,enable_pass,22,F5 Load Balancer
+palo01,192.168.3.5,paloalto_panos,admin,admin_pass,enable_pass,22,Palo Alto Firewall
+
+# System Examples
+linux01,192.168.4.1,linux,admin,admin_pass,,22,Linux Server
+unix01,192.168.4.2,unix,admin,admin_pass,,22,Unix Server
+
+# CSV Format Description:
+# Required Fields:
+# - name: Unique device name
+# - ip_address: Device IP address
+# - device_type: Device type (see below)
+# - username: SSH username
+# - password: SSH password
+#
+# Optional Fields:
+# - enable_password: Enable password (leave empty if not needed)
+# - port: SSH port (default: 22)
+# - description: Device description
+#
+# Supported Device Types (case-insensitive):
+# 1. Cisco Devices:
+#    - cisco_ios: Cisco IOS
+#    - cisco_nxos: Cisco Nexus
+#    - cisco_xe: Cisco IOS-XE
+#    - cisco_asa: Cisco ASA
+#    - cisco_wlc: Cisco WLC
+#    - cisco_xr: Cisco IOS-XR
+#
+# 2. Juniper Devices:
+#    - juniper: Juniper (Generic)
+#    - juniper_junos: Juniper JunOS
+#
+# 3. Other Network Devices:
+#    - arista_eos: Arista EOS
+#    - hp_procurve: HP ProCurve
+#    - hp_comware: HP Comware
+#    - huawei: Huawei (Generic)
+#    - huawei_vrpv8: Huawei VRP v8
+#    - f5_ltm: F5 LTM
+#    - fortinet: Fortinet
+#    - paloalto_panos: Palo Alto
+#    - checkpoint_gaia: Check Point
+#    - alcatel_aos: Alcatel
+#    - dell_force10: Dell Force10
+#    - extreme: Extreme Networks
+#    - mikrotik_routeros: MikroTik
+#    - ubiquiti_edge: Ubiquiti
+#    - brocade_nos: Brocade
+#
+# 4. Systems:
+#    - linux: Linux Systems
+#    - unix: Unix Systems

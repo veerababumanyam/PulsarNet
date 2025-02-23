@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PulsarNet Help Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .shortcut {
+            background-color: #f8f9fa;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>PulsarNet - Network Device Management System</h1>
+    <div class="section">
+        <h2>1. Overview</h2>
+        <p>PulsarNet is a comprehensive network device management system designed for efficient backup, monitoring, and configuration of network devices. The application follows ISO/IEC 9126 standards for software quality.</p>
+    </div>
+
+    <div class="section">
+        <h2>2. Main Features</h2>
+        <h3>2.1 Device Management</h3>
+        <ul>
+            <li>Add, edit, and remove network devices</li>
+            <li>Group devices for organized management</li>
+            <li>Import devices from CSV files</li>
+            <li>Real-time device status monitoring</li>
+        </ul>
+
+        <h3>2.2 Backup Management</h3>
+        <ul>
+            <li>Manual and automated configuration backups</li>
+            <li>Local and remote storage options (FTP, SFTP, TFTP)</li>
+            <li>Flexible scheduling options (daily, weekly, custom)</li>
+            <li>Retention policy management</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>3. Keyboard Shortcuts</h2>
+        <table>
+            <tr>
+                <th>Action</th>
+                <th>Shortcut</th>
+            </tr>
+            <tr>
+                <td>Import Devices</td>
+                <td><span class="shortcut">Ctrl+I</span></td>
+            </tr>
+            <tr>
+                <td>Add Device</td>
+                <td><span class="shortcut">Ctrl+N</span></td>
+            </tr>
+            <tr>
+                <td>Add Group</td>
+                <td><span class="shortcut">Ctrl+G</span></td>
+            </tr>
+            <tr>
+                <td>Remove Device</td>
+                <td><span class="shortcut">Del</span></td>
+            </tr>
+            <tr>
+                <td>Backup Selected</td>
+                <td><span class="shortcut">Ctrl+B</span></td>
+            </tr>
+            <tr>
+                <td>Backup All</td>
+                <td><span class="shortcut">Ctrl+Shift+B</span></td>
+            </tr>
+            <tr>
+                <td>Test Connection</td>
+                <td><span class="shortcut">Ctrl+T</span></td>
+            </tr>
+            <tr>
+                <td>Refresh</td>
+                <td><span class="shortcut">F5</span></td>
+            </tr>
+            <tr>
+                <td>Settings</td>
+                <td><span class="shortcut">Ctrl+,</span></td>
+            </tr>
+            <tr>
+                <td>Exit</td>
+                <td><span class="shortcut">Alt+F4</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>4. Storage Configuration</h2>
+        <h3>4.1 Local Storage</h3>
+        <ul>
+            <li>Default location: ~/.pulsarnet/backups</li>
+            <li>Custom path selection available</li>
+            <li>Automatic directory creation</li>
+        </ul>
+
+        <h3>4.2 Remote Storage</h3>
+        <ul>
+            <li>Supported protocols: FTP, SFTP, TFTP</li>
+            <li>Secure credential management</li>
+            <li>Custom remote path configuration</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>5. Scheduler</h2>
+        <h3>5.1 Schedule Types</h3>
+        <ul>
+            <li>Daily: Run at specified time every day</li>
+            <li>Weekly: Run on selected days at specified time</li>
+            <li>Custom: Advanced scheduling options</li>
+        </ul>
+
+        <h3>5.2 Schedule Management</h3>
+        <ul>
+            <li>Add, edit, and remove schedules</li>
+            <li>Device selection for each schedule</li>
+            <li>Status tracking (last run, next run)</li>
+            <li>Automatic execution of due backups</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>6. Error Handling</h2>
+        <ul>
+            <li>Comprehensive error logging</li>
+            <li>User-friendly error messages</li>
+            <li>Automatic recovery mechanisms</li>
+            <li>Detailed status reporting</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>7. Support</h2>
+        <p>For additional support or to report issues, please contact:</p>
+        <p>Author: Veera Babu Manyam<br>
+        Email: veerababumanyam@gmail.com</p>
+    </div>
+</body>
+</html>
