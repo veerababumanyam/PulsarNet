@@ -1,6 +1,0 @@
-name,ip_address,device_type,username,password,enable_password,port,description
-switch01,192.168.1.1,cisco_ios,admin,admin_pass,enable_pass,22,Core Switch
-switch02,192.168.1.2,cisco_ios,admin,admin_pass,enable_pass,23,Core Switch
-switch03,192.168.1.3,cisco_ios,admin,admin_pass,enable_pass,24,Core Switch
-switch04,192.168.1.4,cisco_ios,admin,admin_pass,enable_pass,25,Core Switch
-switch05,192.168.1.5,cisco_ios,admin,admin_pass,enable_pass,26,Core Switch

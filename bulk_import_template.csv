@@ -1,0 +1,5 @@
+name,ip_address,device_type,username,password,enable_password,port,protocol,connection_type,jump_server,jump_host_name,jump_username,jump_password,jump_protocol,jump_port,use_keys,key_file,groups
+Router-SSH,192.168.1.10,cisco_ios,admin,admin123,enable123,22,ssh,direct_ssh,,,,,,,false,,"Core,Production"
+Switch-Telnet,192.168.1.20,hp_comware,admin,admin123,enable123,23,telnet,direct_telnet,,,,,,,false,,"Access,Management"
+Firewall-Jump-Telnet,10.0.0.5,checkpoint,admin,admin123,enable123,23,telnet,jump_host,192.168.2.1,JumpHost1,jumper,jump123,telnet,23,false,,Security
+Router-Jump-SSH,10.0.0.6,cisco_ios,admin,admin123,enable123,22,ssh,jump_host,192.168.2.2,JumpHost2,jumper2,jump321,ssh,22,true,/path/to/ssh/key.pem,"Core,Edge"

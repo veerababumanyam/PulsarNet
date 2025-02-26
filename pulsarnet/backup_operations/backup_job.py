@@ -60,6 +60,10 @@ class BackupJob:
         self.status = BackupStatus.PENDING
         self.progress = BackupProgress()
         self.result: Dict[str, Any] = {}
+        
+        # Additional device details for better logging and tracking
+        self.device_name = config.get('device_name', '')
+        self.device_type = config.get('device_type', '')
 
     async def start(self) -> None:
         """Start the backup operation."""

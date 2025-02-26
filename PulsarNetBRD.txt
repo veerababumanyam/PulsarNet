@@ -11,6 +11,7 @@ PulsarNet is a robust GUI application designed to streamline the backup processe
 **Modular breakdown**
 Backup Operations Module: Manages backup processes, supporting various network devices and protocols.
 Device Management Module: Handles device credentials, grouping, and connectivity testing.
+Legacy Support Module: Manages Telnet-based legacy device connections and jump host configurations.
 Storage Management Module: Oversees backup storage configurations, including location settings and retention policies.
 Monitoring Module: Provides real-time tracking of backup progress and maintains logs.
 Scheduler Module: Facilitates the scheduling of automated backup tasks with flexible timing options.
@@ -19,14 +20,14 @@ Error Handling Module: Implements comprehensive error management and logging acr
 **Technology Stack**
 Programming Language: Python
 GUI Framework: PyQt6
-Network Communication: Netmiko
+Network Communication: Netmiko, Telnetlib
 Asynchronous Networking: Asyncio, Aiohttp
 Database: SQLite with Aiosqlite for asynchronous operations
 Object-Relational Mapping (ORM): SQLAlchemy
 Data Handling: Pandas
 Configuration Management: python-dotenv
 Logging: Concurrent Log Handler
-File Transfer Protocol: TFTP
+File Transfer Protocol: TFTP, XMODEM
 
 **Features:**
 - **Backup Operations:**
@@ -35,6 +36,8 @@ File Transfer Protocol: TFTP
   - Real-time backup status monitoring
   - Backup verification and failure handling
   - Manual and scheduled backup initiation
+  - Legacy device backup support via Telnet
+  - Jump host routing for remote device access
 
 - **Device Management:**
   - Comprehensive device credentials management
@@ -91,4 +94,4 @@ File Transfer Protocol: TFTP
   - Clear visual feedback indicators
   - Consistent UI element positioning
 
-By adhering to these standards and implementing the outlined features, PulsarNet ensures a secure, accessible, and efficient solution for network device backup management. 
+By adhering to these standards and implementing the outlined features, PulsarNet ensures a secure, accessible, and efficient solution for network device backup management.

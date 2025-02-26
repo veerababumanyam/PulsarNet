@@ -70,3 +70,11 @@ class DeviceGroup:
         
         # Devices should be added separately to maintain proper object references
         return group
+
+    @property
+    def members(self) -> List[Device]:
+        return self.devices
+
+    @members.setter
+    def members(self, value: List[Device]) -> None:
+        self.devices = value

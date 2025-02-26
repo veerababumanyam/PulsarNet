@@ -1,4 +1,4 @@
-\"""Unit tests for storage management functionality."""
+"""Unit tests for storage management functionality."""
 
 import pytest
 from pulsarnet.storage_management.storage_manager import StorageManager
@@ -85,4 +85,4 @@ async def test_retention_policy_validation(sample_retention_policy):
     
     # Test policy limits
     assert await sample_retention_policy.should_retain_backup('test.cfg', 0) is True
-    assert await sample_retention_policy.should_retain_backup('test.cfg', 100) is False"}}}}
+    assert await sample_retention_policy.should_retain_backup('test.cfg', 100) is False

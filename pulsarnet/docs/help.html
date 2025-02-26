@@ -61,11 +61,84 @@
             <li>Local and remote storage options (FTP, SFTP, TFTP)</li>
             <li>Flexible scheduling options (daily, weekly, custom)</li>
             <li>Retention policy management</li>
+            <li>Support for various device connection methods (direct, jump host)</li>
+            <li>Multi-vendor device support with customized command sets</li>
         </ul>
     </div>
 
     <div class="section">
-        <h2>3. Keyboard Shortcuts</h2>
+        <h2>3. Application Menu Structure</h2>
+        <p>PulsarNet's menu structure follows ISO 9241-110 standards for ergonomic user interface design, ensuring consistent and intuitive access to all application functions.</p>
+        
+        <h3>3.1 Menu Organization</h3>
+        <p>The PulsarNet application uses a streamlined UI with a simplified menu structure and intuitive tab-based navigation:</p>
+        <ul>
+            <li><strong>Menu Bar:</strong> Contains the File menu with essential application controls</li>
+            <li><strong>Tab Navigation:</strong> Provides easy access to Devices, Groups, Backup, and Storage functions</li>
+            <li><strong>Contextual Buttons:</strong> Each tab contains its own set of function-specific buttons</li>
+        </ul>
+        
+        <h3>3.2 File Menu</h3>
+        <table>
+            <tr>
+                <th>Menu Item</th>
+                <th>Description</th>
+                <th>Shortcut</th>
+            </tr>
+            <tr>
+                <td>Add Device</td>
+                <td>Create a new device entry</td>
+                <td><span class="shortcut">Ctrl+N</span></td>
+            </tr>
+            <tr>
+                <td>Import Devices</td>
+                <td>Import device definitions from CSV file</td>
+                <td><span class="shortcut">Ctrl+I</span></td>
+            </tr>
+            <tr>
+                <td>Export Devices</td>
+                <td>Export device list to CSV file</td>
+                <td><span class="shortcut">Ctrl+E</span></td>
+            </tr>
+            <tr>
+                <td>Exit</td>
+                <td>Close the application</td>
+                <td><span class="shortcut">Alt+F4</span></td>
+            </tr>
+        </table>
+        
+        <h3>3.3 Tab Navigation</h3>
+        <p>The application uses a tabbed interface for efficient navigation between major functional areas:</p>
+        <table>
+            <tr>
+                <th>Tab</th>
+                <th>Function</th>
+            </tr>
+            <tr>
+                <td>Devices</td>
+                <td>View, add, edit, and manage network devices</td>
+            </tr>
+            <tr>
+                <td>Groups</td>
+                <td>Create and manage device groups for organized administration</td>
+            </tr>
+            <tr>
+                <td>Backup</td>
+                <td>Configure and perform device configuration backups</td>
+            </tr>
+            <tr>
+                <td>Storage</td>
+                <td>Manage backup storage locations and settings</td>
+            </tr>
+            <tr>
+                <td>Scheduler</td>
+                <td>Configure automated backup schedules</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>4. Keyboard Shortcuts</h2>
         <table>
             <tr>
                 <th>Action</th>
@@ -115,15 +188,15 @@
     </div>
 
     <div class="section">
-        <h2>4. Storage Configuration</h2>
-        <h3>4.1 Local Storage</h3>
+        <h2>5. Storage Configuration</h2>
+        <h3>5.1 Local Storage</h3>
         <ul>
             <li>Default location: ~/.pulsarnet/backups</li>
             <li>Custom path selection available</li>
             <li>Automatic directory creation</li>
         </ul>
 
-        <h3>4.2 Remote Storage</h3>
+        <h3>5.2 Remote Storage</h3>
         <ul>
             <li>Supported protocols: FTP, SFTP, TFTP</li>
             <li>Secure credential management</li>
@@ -132,15 +205,15 @@
     </div>
 
     <div class="section">
-        <h2>5. Scheduler</h2>
-        <h3>5.1 Schedule Types</h3>
+        <h2>6. Scheduler</h2>
+        <h3>6.1 Schedule Types</h3>
         <ul>
             <li>Daily: Run at specified time every day</li>
             <li>Weekly: Run on selected days at specified time</li>
             <li>Custom: Advanced scheduling options</li>
         </ul>
 
-        <h3>5.2 Schedule Management</h3>
+        <h3>6.2 Schedule Management</h3>
         <ul>
             <li>Add, edit, and remove schedules</li>
             <li>Device selection for each schedule</li>
@@ -150,7 +223,7 @@
     </div>
 
     <div class="section">
-        <h2>6. Error Handling</h2>
+        <h2>7. Error Handling</h2>
         <ul>
             <li>Comprehensive error logging</li>
             <li>User-friendly error messages</li>
@@ -160,10 +233,147 @@
     </div>
 
     <div class="section">
-        <h2>7. Support</h2>
+        <h2>8. Support</h2>
         <p>For additional support or to report issues, please contact:</p>
         <p>Author: Veera Babu Manyam<br>
         Email: veerababumanyam@gmail.com</p>
+    </div>
+
+    <div class="section">
+        <h2>9. Backup Process - Detailed Overview</h2>
+        <p>PulsarNet follows ISO/IEC 27001 standard practices for secure and reliable network device configuration backups. This section provides a comprehensive explanation of the backup process flow.</p>
+
+        <h3>9.1 Backup Data Flow</h3>
+        <p>The configuration backup process follows this secure path:</p>
+        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+Target Device → Jump Host (if used) → PulsarNet Application → Storage Location
+        </pre>
+        
+        <p><strong>Important:</strong> Configuration data is not transferred directly from the target device to a storage server. This design ensures compatibility with enterprise environments that have strict firewall policies and network segmentation.</p>
+
+        <h3>9.2 Backup Process Steps</h3>
+        <ol>
+            <li><strong>Connection Establishment:</strong> 
+                <ul>
+                    <li>PulsarNet connects to the target device (directly or via jump host)</li>
+                    <li>Authentication is performed using configured credentials</li>
+                    <li>For jump host configurations, a secure SSH tunnel is established first</li>
+                </ul>
+            </li>
+            <li><strong>Command Execution:</strong>
+                <ul>
+                    <li>Device-specific commands are executed (e.g., "show running-config" for Cisco devices)</li>
+                    <li>Output is captured in memory by the PulsarNet application</li>
+                    <li>No temporary files are created on jump hosts or target devices</li>
+                </ul>
+            </li>
+            <li><strong>Configuration Storage:</strong>
+                <ul>
+                    <li>Configuration is saved locally on the PulsarNet host system by default</li>
+                    <li>Optional transfer to remote storage servers (SFTP, FTP, TFTP) if configured</li>
+                    <li>File naming convention: [device_name]_[IP]_[timestamp].cfg</li>
+                </ul>
+            </li>
+            <li><strong>Verification (Optional):</strong>
+                <ul>
+                    <li>Configuration syntax validation</li>
+                    <li>Comparison with previous backups for change detection</li>
+                    <li>Backup integrity verification</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>9.3 Connection Types and Protocols</h3>
+        <table>
+            <tr>
+                <th>Connection Type</th>
+                <th>Backup Protocol</th>
+                <th>Use Case</th>
+            </tr>
+            <tr>
+                <td>Direct SSH</td>
+                <td>SCP</td>
+                <td>Devices with direct SSH access</td>
+            </tr>
+            <tr>
+                <td>Direct Telnet</td>
+                <td>TFTP</td>
+                <td>Legacy devices without SSH</td>
+            </tr>
+            <tr>
+                <td>Jump SSH → Device SSH</td>
+                <td>SFTP</td>
+                <td>Devices behind firewall, accessed via jump server</td>
+            </tr>
+            <tr>
+                <td>Jump SSH → Device Telnet</td>
+                <td>SFTP</td>
+                <td>Legacy devices behind firewall</td>
+            </tr>
+            <tr>
+                <td>Jump Telnet → Device SSH/Telnet</td>
+                <td>SFTP</td>
+                <td>Complex network topologies with legacy jump hosts</td>
+            </tr>
+        </table>
+
+        <h3>9.4 Protocol Selection Logic</h3>
+        <p>PulsarNet automatically selects the most appropriate backup protocol based on device connection type:</p>
+        <ul>
+            <li>Direct SSH connections use SCP for secure file transfer</li>
+            <li>Direct Telnet connections use TFTP for compatibility</li>
+            <li>Jump host configurations use SFTP which supports proxying through intermediary hosts</li>
+        </ul>
+
+        <h3>9.5 Enterprise Environment Considerations</h3>
+        <p>PulsarNet's backup implementation accounts for common enterprise constraints:</p>
+        <ul>
+            <li><strong>Firewall Traversal:</strong> Only the PulsarNet application needs outbound access to jump hosts and storage servers</li>
+            <li><strong>Network Segmentation:</strong> Works in environments where network devices are in isolated segments</li>
+            <li><strong>Minimal Access Requirements:</strong> Target devices only need to accept connections from jump hosts</li>
+            <li><strong>Security:</strong> No outbound connections from sensitive network devices, no credentials for storage servers needed on network devices</li>
+        </ul>
+
+        <h3>9.6 Vendor-Specific Command Sets</h3>
+        <p>PulsarNet uses optimized command sequences for different device types:</p>
+        <table>
+            <tr>
+                <th>Vendor/OS</th>
+                <th>Commands Used</th>
+            </tr>
+            <tr>
+                <td>Cisco IOS</td>
+                <td><code>terminal length 0</code>, <code>show running-config</code></td>
+            </tr>
+            <tr>
+                <td>Cisco NX-OS</td>
+                <td><code>terminal length 0</code>, <code>show running-config</code></td>
+            </tr>
+            <tr>
+                <td>Juniper</td>
+                <td><code>show configuration | display set</code></td>
+            </tr>
+            <tr>
+                <td>Arista</td>
+                <td><code>terminal width 512</code>, <code>show running-config</code></td>
+            </tr>
+            <tr>
+                <td>Palo Alto</td>
+                <td><code>set cli pager off</code>, <code>show config running format xml</code></td>
+            </tr>
+            <tr>
+                <td>HP Comware</td>
+                <td><code>screen-length disable</code>, <code>display current-configuration</code></td>
+            </tr>
+            <tr>
+                <td>HP ProCurve</td>
+                <td><code>no page</code>, <code>show running-config</code></td>
+            </tr>
+            <tr>
+                <td>Huawei</td>
+                <td><code>screen-length 0 temporary</code>, <code>display current-configuration</code></td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>

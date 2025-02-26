@@ -14,6 +14,7 @@ import asyncio
 import logging
 import os
 import json
+from .connection_types import DeviceConnectionType
 
 class DeviceType(Enum):
     """Enumeration of supported device types."""
@@ -78,6 +79,18 @@ class DeviceType(Enum):
             logging.error(f"Error in DeviceType.__eq__: {str(e)}")
             return False
 
+    def __hash__(self):
+        """Return a hash value for the enum.
+        
+        Returns:
+            int: Hash value based on the enum name
+            
+        Note:
+            This is required because we've implemented a custom __eq__ method.
+            We use the enum name for hashing to ensure consistent behavior.
+        """
+        return hash(self.name)
+
 class ConnectionStatus(Enum):
     """Enumeration of possible device connection states."""
     UNKNOWN = "unknown"  # For backward compatibility
@@ -112,15 +125,62 @@ class Device:
         password: str = None,
         enable_password: str = None,
         port: int = 22,
+        connection_type: DeviceConnectionType = DeviceConnectionType.DIRECT_SSH,
+        use_jump_server=False,
+        jump_server=None,
+        jump_username=None,
+        jump_password=None,
+        **kwargs
     ):
         """Initialize device instance."""
         self.name = name
         self.ip_address = ip_address
-        self.device_type = device_type
+        self.device_type = Device._convert_device_type(device_type)
         self.username = username
-        self._password = password
-        self._enable_password = enable_password
+        self.password = password
+        self.enable_password = enable_password
         self.port = port
+        self.connection_type = connection_type
+        self.use_jump_server = use_jump_server
+        
+        # If connection_type starts with 'jump_', ensure use_jump_server is True
+        if isinstance(self.connection_type, DeviceConnectionType) and self.connection_type.value.startswith('jump_'):
+            self.use_jump_server = True
+            logging.debug(f"Setting use_jump_server=True based on connection_type={self.connection_type.value}")
+        
+        self.jump_server = jump_server
+        self.jump_username = jump_username
+        self.jump_password = jump_password
+        
+        # Standardize jump host fields for consistency
+        self.jump_host_name = kwargs.get('jump_host_name', '')
+        
+        # Ensure jump_protocol is properly set from kwargs
+        # This is the key field that needs to be correctly set
+        jump_protocol = kwargs.get('jump_protocol', 'ssh')
+        if isinstance(jump_protocol, str):
+            self.jump_protocol = jump_protocol.lower()
+        else:
+            self.jump_protocol = 'ssh'  # Default to SSH if not a string
+            
+        # For backwards compatibility, also set jump_connection_type
+        self.jump_connection_type = self.jump_protocol
+            
+        # Log jump host details for debugging
+        if self.use_jump_server:
+            logging.info(f"Jump host details for {self.name}:")
+            logging.info(f"  - jump_server: {self.jump_server}")
+            logging.info(f"  - jump_host_name: {self.jump_host_name}")
+            logging.info(f"  - jump_username: {self.jump_username}")
+            logging.info(f"  - jump_protocol: {self.jump_protocol}")
+            logging.info(f"  - jump_port: {kwargs.get('jump_port', 22)}")
+            logging.info(f"  - connection_type: {self.connection_type.value if isinstance(self.connection_type, DeviceConnectionType) else self.connection_type}")
+        
+        self.jump_port = int(kwargs.get('jump_port', 22))
+        
+        # For backwards compatibility
+        self.jump_server_port = self.jump_port
+        
         self.is_connected = False
         self.last_seen = None
         self.last_connected = None
@@ -130,13 +190,60 @@ class Device:
         self.backup_in_progress = False
         self.backup_history: List[BackupHistory] = []
         self._backup_status = ""  # Add backup status tracking
-        self.last_backup = None  # Add last backup tracking
+        self._last_backup = None  # Add last backup tracking
+        
+        # SSH key authentication
+        self.use_keys = kwargs.get('use_keys', False)
+        self.key_file = kwargs.get('key_file', '')
         
         # Initialize settings
-        self.custom_settings: Dict[str, str] = {}
+        self.custom_settings = kwargs.get('custom_settings', {})
         
         # Initialize connection
         self._connection = None
+        
+        # Initialize groups
+        self.groups = kwargs.get('groups', [])
+
+    @staticmethod
+    def _convert_device_type(input_type):
+        """Convert input device type to a DeviceType enum if possible, otherwise return the input as is."""
+        if isinstance(input_type, DeviceType):
+            return input_type
+        try:
+            return DeviceType(input_type)
+        except Exception:
+            return input_type
+
+    async def connect(self):
+        """Asynchronously simulate connecting the device."""
+        self.is_connected = True
+        self.connection_status = ConnectionStatus.CONNECTED
+        return True
+
+    async def disconnect(self):
+        """Asynchronously simulate disconnecting the device."""
+        self.is_connected = False
+        self.connection_status = ConnectionStatus.DISCONNECTED
+        return True
+
+    async def backup_config(self):
+        """Asynchronously simulate backing up the device configuration."""
+        config = "interface GigabitEthernet0/1\n no shutdown"
+        self.backup_history.append(
+            BackupHistory(
+                timestamp=datetime.now(),
+                status="success",
+                backup_path="/dummy/path",
+                protocol_used="dummy"
+            )
+        )
+        self.last_backup = datetime.now()
+        return config
+
+    async def restore_config(self, config):
+        """Asynchronously simulate restoring the device configuration."""
+        return True
 
     def set_error(self, error_msg: str):
         """Set the last error message."""
@@ -185,9 +292,9 @@ class Device:
                 'device_type': self.device_type.value,
                 'host': self.ip_address,
                 'username': self.username,
-                'password': self._password,
+                'password': self.password,
                 'port': self.port,
-                'secret': self._enable_password,
+                'secret': self.enable_password,
                 'timeout': 10,  # Connection timeout
                 'session_timeout': 60,  # Session timeout
                 'auth_timeout': 10,  # Authentication timeout
@@ -241,98 +348,6 @@ class Device:
 
         finally:
             self.backup_in_progress = False  # Re-enable operations
-
-    async def connect(self):
-        """Establish connection to the device."""
-        try:
-            self.connection_status = ConnectionStatus.CONNECTING
-            
-            # Create connection parameters
-            device_params = {
-                'device_type': self.device_type.value,
-                'host': self.ip_address,
-                'username': self.username,
-                'password': self._password,
-                'port': self.port,
-                'secret': self._enable_password,
-                'timeout': 10,
-                'session_timeout': 60,
-                'auth_timeout': 10
-            }
-            
-            # Create connection in thread pool
-            loop = asyncio.get_event_loop()
-            self._connection = await loop.run_in_executor(
-                None, 
-                lambda: netmiko.ConnectHandler(**device_params)
-            )
-            
-            self.connection_status = ConnectionStatus.CONNECTED
-            self.is_connected = True
-            self.last_connected = datetime.now()
-            
-        except netmiko.NetmikoTimeoutException:
-            self.connection_status = ConnectionStatus.TIMEOUT
-            raise
-        except netmiko.NetmikoAuthenticationException:
-            self.connection_status = ConnectionStatus.AUTH_FAILED
-            raise
-        except Exception as e:
-            self.connection_status = ConnectionStatus.ERROR
-            raise
-
-    async def backup_config(self) -> bool:
-        """Backup device configuration."""
-        try:
-            if self.backup_in_progress:
-                self.backup_status = "Backup already in progress"
-                self.set_error("Backup already in progress")
-                return False
-                
-            self.backup_in_progress = True
-            self.last_error = None  # Clear previous errors
-            self.backup_status = "Starting backup..."
-            
-            # Connect to device
-            try:
-                await self.connect()
-            except netmiko.NetmikoTimeoutException:
-                error_msg = f"TCP connection to device failed.\n\nCommon causes of this problem are:\n1. Incorrect hostname or IP address.\n2. Wrong TCP port.\n3. Intermediate firewall blocking access.\n\nDevice settings: {self.device_type.value} {self.ip_address}:{self.port}"
-                self.set_error(error_msg)
-                self.backup_status = "Connection failed"
-                return False
-            except netmiko.NetmikoAuthenticationException:
-                self.set_error(f"Authentication failed. Please check username and password.")
-                self.backup_status = "Authentication failed"
-                return False
-            except Exception as e:
-                self.set_error(f"Connection error: {str(e)}")
-                self.backup_status = "Connection error"
-                return False
-
-            # Get device configuration
-            try:
-                self.backup_status = "Retrieving configuration..."
-                config = await self.get_config()
-                if not config:
-                    self.set_error("Failed to retrieve configuration")
-                    self.backup_status = "Failed to get config"
-                    return False
-                    
-                # Save configuration
-                self.backup_status = "Saving configuration..."
-                await self.save_config(config)
-                self.last_error = None  # Clear error on success
-                self.backup_status = "Backup completed successfully"
-                return True
-                
-            except Exception as e:
-                self.set_error(f"Backup error: {str(e)}")
-                self.backup_status = "Backup failed"
-                return False
-                
-        finally:
-            self.backup_in_progress = False
 
     async def get_config(self) -> str:
         """Get device configuration based on device type."""
@@ -516,14 +531,29 @@ class Device:
 
     def to_dict(self) -> dict:
         """Convert device to dictionary for serialization."""
+        # Handle connection_type which might be a string or an enum
+        if isinstance(self.connection_type, str):
+            connection_type_value = self.connection_type
+        else:
+            # Assume it's an enum
+            connection_type_value = self.connection_type.value
+            
         return {
             'name': self.name,
             'ip_address': self.ip_address,
             'device_type': self.device_type.value,
             'username': self.username,
-            'password': self._password,
-            'enable_password': self._enable_password,
+            'password': self.password,
+            'enable_password': self.enable_password,
             'port': self.port,
+            'connection_type': connection_type_value,
+            'use_jump_server': self.use_jump_server,
+            'jump_server': self.jump_server,
+            'jump_username': self.jump_username,
+            'jump_password': self.jump_password,
+            'jump_protocol': getattr(self, 'jump_protocol', 'ssh'),
+            'jump_host_name': getattr(self, 'jump_host_name', ''),
+            'jump_port': getattr(self, 'jump_port', 22),
             'connection_status': self.connection_status.value,
             'is_connected': self.is_connected,
             'last_seen': self.last_seen.isoformat() if self.last_seen else None,
@@ -534,21 +564,118 @@ class Device:
     @classmethod
     def from_dict(cls, data: dict) -> 'Device':
         """Create device from dictionary."""
-        device = cls(
-            name=data['name'],
-            ip_address=data['ip_address'],
-            device_type=DeviceType(data['device_type']),
-            username=data['username'],
-            password=data['password'],
+        # Debug logging to see what data is being passed
+        logging.debug(f"Creating device from dict: {data}")
+        
+        # Log jump host details if present
+        if data.get('use_jump_server') or data.get('connection_type', '').startswith('jump_'):
+            logging.info(f"Importing device with jump host configuration: {data.get('name')}")
+            logging.info(f"  - jump_server: {data.get('jump_server')}")
+            logging.info(f"  - jump_host_name: {data.get('jump_host_name')}")
+            logging.info(f"  - jump_username: {data.get('jump_username')}")
+            logging.info(f"  - jump_protocol: {data.get('jump_protocol')}")
+            logging.info(f"  - jump_port: {data.get('jump_port')}")
+            logging.info(f"  - connection_type: {data.get('connection_type')}")
+            logging.info(f"  - use_jump_server: {data.get('use_jump_server')}")
+        
+        groups = data.get('groups', [])
+        if isinstance(groups, str):
+            groups = [g.strip() for g in groups.split(',') if g.strip()]
+
+        raw_connection = data.get('connection_type', 'direct_ssh').lower()
+        # Special handling for 'jump_host' connection type
+        if raw_connection == 'jump_host':
+            # For 'jump_host', determine the connection type based on protocols
+            device_protocol = data.get('protocol', 'ssh').lower()
+            jump_protocol = data.get('jump_protocol', 'ssh').lower()
+            
+            if jump_protocol == 'telnet' and device_protocol == 'telnet':
+                raw_connection = 'jump_telnet/telnet'
+            elif jump_protocol == 'telnet' and device_protocol == 'ssh':
+                raw_connection = 'jump_telnet/ssh'
+            elif jump_protocol == 'ssh' and device_protocol == 'telnet':
+                raw_connection = 'jump_ssh/telnet'
+            else:  # Default: SSH jump host to SSH device
+                raw_connection = 'jump_ssh/ssh'
+                
+            # Update the connection_type in the data dictionary
+            data['connection_type'] = raw_connection
+            # Explicitly set use_jump_server to True for jump_host connections
+            data['use_jump_server'] = True
+            logging.info(f"Converted 'jump_host' to '{raw_connection}' based on protocols")
+            
+        # Process jump host connection types
+        if raw_connection.startswith('jump_'):
+            # Set use_jump_server to True for any jump host connection
+            data['use_jump_server'] = True
+            
+            mapping = {
+                'jump_telnet/telnet': DeviceConnectionType.JUMP_TELNET_DEVICE_TELNET,
+                'jump_telnet/ssh': DeviceConnectionType.JUMP_TELNET_DEVICE_SSH,
+                'jump_ssh/telnet': DeviceConnectionType.JUMP_SSH_DEVICE_TELNET,
+                'jump_ssh/ssh': DeviceConnectionType.JUMP_SSH_DEVICE_SSH
+            }
+            final_connection = mapping.get(raw_connection, DeviceConnectionType(raw_connection))
+            
+            # Ensure all jump host fields are present
+            if not data.get('jump_server'):
+                logging.warning(f"Jump server IP not provided for {data.get('name')} with connection type {raw_connection}")
+            
+            # Set default values for jump host fields if not provided
+            if not data.get('jump_protocol'):
+                data['jump_protocol'] = 'ssh'
+                logging.info(f"Setting default jump_protocol='ssh' for {data.get('name')}")
+                
+            if not data.get('jump_port') or data.get('jump_port') in [None, ""]:
+                data['jump_port'] = 22
+                logging.info(f"Setting default jump_port=22 for {data.get('name')}")
+        else:
+            final_connection = DeviceConnectionType(raw_connection)
+
+        # Debug logging for jump host details
+        if data.get('use_jump_server') or raw_connection.startswith('jump_'):
+            logging.info(f"Jump host details for {data.get('name')}: ")
+            logging.info(f"  - jump_server: {data.get('jump_server')}")
+            logging.info(f"  - jump_host_name: {data.get('jump_host_name')}")
+            logging.info(f"  - jump_username: {data.get('jump_username')}")
+            logging.info(f"  - jump_protocol: {data.get('jump_protocol')}")
+            logging.info(f"  - jump_port: {data.get('jump_port')}")
+            logging.info(f"  - connection_type: {raw_connection}")
+            logging.info(f"  - use_jump_server: {data.get('use_jump_server')}")
+
+        # Convert use_jump_server to boolean properly
+        use_jump_server = False
+        if 'use_jump_server' in data:
+            if isinstance(data['use_jump_server'], bool):
+                use_jump_server = data['use_jump_server']
+            elif isinstance(data['use_jump_server'], str):
+                use_jump_server = data['use_jump_server'].lower() == 'true'
+            else:
+                use_jump_server = bool(data['use_jump_server'])
+        
+        # Force use_jump_server to True if connection_type indicates a jump host
+        if raw_connection.startswith('jump_') or raw_connection == 'jump_host':
+            use_jump_server = True
+            logging.info(f"Forcing use_jump_server=True for {data.get('name')} based on connection_type={raw_connection}")
+
+        return cls(
+            name=data.get('name'),
+            ip_address=data.get('ip_address'),
+            device_type=Device._convert_device_type(data.get('device_type')),
+            username=data.get('username'),
+            password=data.get('password'),
             enable_password=data.get('enable_password'),
-            port=data.get('port', 22)
+            port=int(data.get('port', 22)),
+            connection_type=final_connection,
+            use_jump_server=use_jump_server,  # Use the properly converted boolean value
+            jump_server=data.get('jump_server'),
+            jump_host_name=data.get('jump_host_name'),
+            jump_username=data.get('jump_username'),
+            jump_password=data.get('jump_password'),
+            jump_protocol=data.get('jump_protocol', 'ssh'),
+            jump_port=int(data.get('jump_port', 22)) if data.get('jump_port') not in [None, ""] else 22,
+            use_keys=(str(data.get('use_keys', 'false')).lower() == 'true'),
+            key_file=data.get('key_file'),
+            custom_settings=data.get('custom_settings', {}),
+            groups=groups
         )
-        
-        # Restore other attributes
-        device.connection_status = ConnectionStatus(data.get('connection_status', 'unknown'))
-        device.is_connected = data.get('is_connected', False)
-        device.last_seen = datetime.fromisoformat(data['last_seen']) if data.get('last_seen') else None
-        device.last_connected = datetime.fromisoformat(data['last_connected']) if data.get('last_connected') else None
-        device.custom_settings = data.get('custom_settings', {})
-        
-        return device

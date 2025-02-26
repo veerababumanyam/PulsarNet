@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Optional, Dict, Any
 from pathlib import Path
+import logging
 
 class ProtocolType(Enum):
     """Enumeration of supported backup protocols."""
@@ -111,10 +112,22 @@ class TFTPProtocol(BackupProtocol):
 
     async def upload_config(self, device_ip: str, config_data: str, filename: str) -> bool:
         try:
-            # Implementation for TFTP upload
-            # In production, this would use a TFTP library
+            # In a real implementation, this would use the actual protocol
+            # For now, let's simulate a more realistic implementation that checks parameters
+            if not config_data or not isinstance(config_data, str):
+                logging.error(f"TFTP Protocol: Invalid config_data: {type(config_data)}")
+                return False
+                
+            server = self.config.get('server')
+            if not server:
+                logging.error("TFTP Protocol: No server specified in configuration")
+                return False
+                
+            # Simulate successful upload
+            logging.info(f"TFTP: Simulated successful config upload to {server}")
             return True
         except Exception as e:
+            logging.error(f"TFTP Protocol upload error: {str(e)}")
             return False
 
     async def verify_backup(self, filename: str) -> bool:

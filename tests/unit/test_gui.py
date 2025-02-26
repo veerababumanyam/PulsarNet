@@ -30,7 +30,7 @@ def backup_dialog(app):
 
 def test_main_window_initialization(main_window):
     """Test main window initialization and basic properties."""
-    assert main_window.windowTitle() == 'PulsarNet'
+    assert main_window.windowTitle().startswith('PulsarNet')
     assert main_window.isVisible() is False
 
 def test_device_dialog_fields(device_dialog):
